@@ -5,10 +5,10 @@ import csv
 import numpy.typing as npt
 import numpy as np
 
-import trinketbox.aiUtils.NNLoops as loops
-import trinketbox.aiUtils.tokenDataset as integerDataset
-import trinketbox.charTokenizer as cT
-import trinketbox.aiUtils.outProcessing as post
+import trinketbox.ai.utils.NNLoops as loops
+import trinketbox.ai.utils.tokenDataset as integerDataset
+import trinketbox.ai.utils.charTokenizer as cT
+import trinketbox.ai.utils.outProcessing as post
 
 
 
