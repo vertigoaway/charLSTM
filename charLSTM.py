@@ -49,10 +49,10 @@ readout = out
 x : list[int] = griotTools.flattenTokenizedLines(vocab.tokenizeLines(out))
 
 
-train_dataSet = integerDataset.textDataset(inSize=inSize,outSize=outSize,
+train_dataSet = integerDataset.lazyTextDataset(inSize=inSize,outSize=outSize,
                                  tokenizedData=x[0:len(x)//2],
                                  vocSize=len(vocab))
-test_dataSet = integerDataset.textDataset(inSize=inSize,outSize=outSize,
+test_dataSet = integerDataset.lazyTextDataset(inSize=inSize,outSize=outSize,
                                 tokenizedData=x[len(x)//2:],
                                 vocSize=len(vocab))
 train_dataloader = DataLoader(train_dataSet, batch_size=batch_size, 
