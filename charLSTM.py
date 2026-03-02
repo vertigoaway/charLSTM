@@ -14,7 +14,7 @@ from griot import tool as griotTools
 #0 is null
 #1 is end of sent
 vocab = char.Vocab()
-vocab.addCharacters(list('abcdefghijklmnopqrstuvwxyz :;\''))
+vocab.addCharacters(list('abcdefghijklmnopqrstuvwxyz -,.:;\''))
 
 
 ### LSTM Architecture Parameters
@@ -41,7 +41,7 @@ with open(trainingData, "r") as csvfile:
     out = []
     for r in readout:
         if len(r[3]) > 3:
-            out.append(r[3].strip().lower())
+            out.append(r[-1].strip().lower())
 readout = out
 
 
