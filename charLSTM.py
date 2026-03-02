@@ -7,26 +7,15 @@ import numpy as np
 
 import trinketbox.ai.utils.NNLoops as loops
 import trinketbox.ai.utils.tokenDataset as integerDataset
-import trinketbox.ai.utils.charTokenizer as cT
 import trinketbox.ai.utils.outProcessing as post
 
-
-
-
+from griot import char
+from griot import tool as griotTools
 #0 is null
 #1 is end of sent
-voc : dict[str,int]= {'�':0,chr(10):1,'-':2,'_':3,
-       'a':4,'b':5,'c':6,'d':7,'e':8,'f':9,'g':10,
-       'h':11,'i':12,'j':13,'k':14,'l':15,'m':16,
-       'n':17,'o':18,'p':19,'q':20,'r':21,'s':22,
-       't':23,'u':24,'v':25,'w':26,'x':27,'y':28,
-       'z':29,' ':30,'.':31,',':32,'\'':33,'/':34,
-       '\"':35,':':36,';':37,'1':38,'2':39,'3':40,
-       '4':41,'5':42,'6':43,'7':44,'8':45,'9':46,
-       '0':47,}
-cov = {i: s for s, i in voc.items()}
+vocab = char.Vocab()
+vocab.addCharacters(list('abcdefghijklmnopqrstuvwxyz :;\''))
 
-vocSize : int = len(voc)
 
 ### LSTM Architecture Parameters
 inSize : int = 512         # Context window
@@ -54,17 +43,18 @@ with open(trainingData, "r") as csvfile:
         if len(r[3]) > 3:
             out.append(r[3].strip().lower())
 readout = out
-            
+
 
 ### Begin tokenizing data
-x = cT.dynamicTokenize(readout,tokDict=voc)
+x : list[int] = griotTools.flattenTokenizedLines(vocab.tokenizeLines(out))
+
 
 train_dataSet = integerDataset.textDataset(inSize=inSize,outSize=outSize,
                                  tokenizedData=x[0:len(x)//2],
-                                 vocSize=vocSize)
+                                 vocSize=len(vocab))
 test_dataSet = integerDataset.textDataset(inSize=inSize,outSize=outSize,
                                 tokenizedData=x[len(x)//2:],
-                                vocSize=vocSize)
+                                vocSize=len(vocab))
 train_dataloader = DataLoader(train_dataSet, batch_size=batch_size, 
                               shuffle=True,
                               num_workers=4)
@@ -108,7 +98,7 @@ class NeuralNetwork(nn.Module):
 
 
 
-model = NeuralNetwork(vocSize=vocSize, inSize=inSize, outSize=outSize, 
+model = NeuralNetwork(vocSize=len(vocab), inSize=inSize, outSize=outSize, 
                       embedding_dim=embedding_dim, hidden_size=hidden_size, 
                       num_layers=num_layers, dropout=dropout).to(device)
 try:
@@ -141,5 +131,5 @@ except KeyboardInterrupt:
     torch.save(model.state_dict(),modelPath)
 print('training session finished')
 print('starting terminal interface')
-post.basicInterface(model,voc,timeSteps=inSize)
+post.basicInterface(model,vocab,timeSteps=inSize)
 
