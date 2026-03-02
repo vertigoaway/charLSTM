@@ -74,7 +74,6 @@ test_dataloader = DataLoader(test_dataSet, batch_size=batch_size,
 
 
 
-
 ###
 class NeuralNetwork(nn.Module):
     def __init__(self, vocSize, inSize, outSize, 
@@ -96,6 +95,7 @@ class NeuralNetwork(nn.Module):
         
     def forward(self, x):
         # x shape: (batch_size, inSize)
+        x = x.to(self.embedding.weight.device)
         x = self.embedding(x)  # (batch_size, inSize, embedding_dim)
         lstm_out, (hidden, cell) = self.lstm(x)  # (batch_size, inSize, hidden_size)
         # Use the last timestep output
@@ -127,6 +127,7 @@ loopdeloop = loops.trainAndTest(train_dataloader,
                                 lossFn,
                                 optimizer)
 print('starting training session')
+print(f"Approx training steps per epoch:{len(train_dataSet)//batch_size}")
 try:
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
