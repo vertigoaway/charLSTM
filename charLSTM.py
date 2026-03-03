@@ -5,9 +5,7 @@ import csv
 import numpy.typing as npt
 import numpy as np
 
-import trinketbox.ai.utils.NNLoops as loops
 import trinketbox.ai.utils.tokenDataset as integerDataset
-import trinketbox.ai.utils.outProcessing as post
 
 from griot import char
 from griot import tool as griotTools
@@ -105,27 +103,7 @@ except FileNotFoundError:
 print(model)
 
 
-optimizer = optimizer(model.parameters(), lr=learning_rate)
 
-loopdeloop = loops.trainAndTest(train_dataloader,
-                                test_dataloader,
-                                model,
-                                lossFn,
-                                optimizer)
-print('starting training session')
-print(f"Approx training steps per epoch:{len(train_dataSet)//batch_size}")
-try:
-    for t in range(epochs):
-        print(f"Epoch {t+1}\n-------------------------------")
-        loopdeloop.train_loop()
-        loopdeloop.test_loop()
-        print('saving model')
-        torch.save(model.state_dict(),modelPath)
-except KeyboardInterrupt:
-    print('interrupted!')
-    print('saving model')
-    torch.save(model.state_dict(),modelPath)
-print('training session finished')
-print('starting terminal interface')
-post.basicInterface(model,vocab,timeSteps=inSize)
+
+
 
