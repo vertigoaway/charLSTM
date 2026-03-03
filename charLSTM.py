@@ -25,40 +25,37 @@ dropout : float = 0.2      # Dropout for regularization between LSTM layers
 device : torch.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 modelPath = 'model.pth'
 ### Training params
-lossFn = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam
-learning_rate : float = 5e-4
-batch_size : int = 20
-epochs : int = 10
-trainingData = "data.csv"
+
 
 
 ### Load data
-with open(trainingData, "r") as csvfile:
-    readout = list(csv.reader(csvfile))[1:]
-    out = []
-    for r in readout:
-        if len(r[3]) > 3:
-            out.append(r[-1].strip().lower())
-readout = out
+def loadTrainAndTestData(batch_size,trainingDataPath="data.csv",divisor=2):
+    with open(trainingDataPath, "r") as csvfile:
+        readout = list(csv.reader(csvfile))[1:]
+        out = []
+        for r in readout:
+            if len(r[3]) > 3:
+                out.append(r[-1].strip().lower())
+    readout = out
 
 
-### Begin tokenizing data
-x : list[int] = griotTools.flattenTokenizedLines(vocab.tokenizeLines(out))
+    ### Begin tokenizing data
+    x : list[int] = griotTools.flattenTokenizedLines(vocab.tokenizeLines(out))
 
 
-train_dataSet = integerDataset.lazyTextDataset(inSize=inSize,outSize=outSize,
-                                 tokenizedData=x[0:len(x)//2],
-                                 vocSize=len(vocab))
-test_dataSet = integerDataset.lazyTextDataset(inSize=inSize,outSize=outSize,
-                                tokenizedData=x[len(x)//2:],
-                                vocSize=len(vocab))
-train_dataloader = DataLoader(train_dataSet, batch_size=batch_size, 
-                              shuffle=True,
-                              num_workers=4)
-test_dataloader = DataLoader(test_dataSet, batch_size=batch_size,
-                              shuffle=True,
-                              num_workers=4)
+    train_dataSet = integerDataset.lazyTextDataset(inSize=inSize,outSize=outSize,
+                                    tokenizedData=x[0:len(x)//divisor],
+                                    vocSize=len(vocab))
+    test_dataSet = integerDataset.lazyTextDataset(inSize=inSize,outSize=outSize,
+                                    tokenizedData=x[len(x)//divisor:],
+                                    vocSize=len(vocab))
+    train_dataloader = DataLoader(train_dataSet, batch_size=batch_size, 
+                                shuffle=True,
+                                num_workers=4)
+    test_dataloader = DataLoader(test_dataSet, batch_size=batch_size,
+                                shuffle=True,
+                                num_workers=4)
+    return train_dataloader,test_dataloader
 
 
 
@@ -104,8 +101,8 @@ try:
     model.load_state_dict(torch.load(modelPath))
 except FileNotFoundError:
     print('loading failed, starting from scratch')
-print(model)
 
+print('model loaded')
 
 
 

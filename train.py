@@ -1,20 +1,33 @@
 import trinketbox.ai.utils.NNLoops as loops
 import charLSTM as clstm
-
+from torch import nn
 import torch
-model = clstm.model
-optimizer = clstm.optimizer(clstm.model.parameters(), lr=clstm.learning_rate)
 
-loopdeloop = loops.trainAndTest(clstm.train_dataloader,
-                                clstm.test_dataloader,
+model = clstm.model
+
+
+batch_size : int = 20
+epochs : int = 10
+trainingDataPath : str = "data.csv"
+
+lossFn = nn.CrossEntropyLoss()
+learning_rate : float = 5e-4
+
+optimizer = torch.optim.Adam(clstm.model.parameters(), lr=learning_rate)
+
+
+
+train_dataloader,test_dataloader = clstm.loadTrainAndTestData(trainingDataPath=trainingDataPath,batch_size=batch_size)
+loopdeloop = loops.trainAndTest(train_dataloader,
+                                test_dataloader,
                                 clstm.model,
-                                clstm.lossFn,
+                                lossFn,
                                 optimizer)
 
 print('starting training session')
-print(f"Approx training steps per epoch:{len(clstm.train_dataSet)//clstm.batch_size}")
+print(f"Approx training steps per epoch:{len(train_dataloader)//batch_size}")
 try:
-    for t in range(clstm.epochs):
+    for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
         loopdeloop.train_loop()
         loopdeloop.test_loop()
