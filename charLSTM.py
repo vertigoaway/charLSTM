@@ -82,11 +82,15 @@ class NeuralNetwork(nn.Module):
         self.vocSize = vocSize
         
     def forward(self, x):
-        x = self.embedding(x)
-        lstm_out, _ = self.lstm(x)
-        x = lstm_out[:, -1, :]
+        # x shape: (batch_size, inSize)
+        x = x.to(self.embedding.weight.device)
+        x = self.embedding(x)  # (batch_size, inSize, embedding_dim)
+        lstm_out, (hidden, cell) = self.lstm(x)  # (batch_size, inSize, hidden_size)
+        # Use the last timestep output
+        x = lstm_out[:, -1, :]  # (batch_size, hidden_size)
         x = self.layerNorm(x)
-        logits = self.linear(x)  # (B, V)
+        logits = self.linear(x)  # (batch_size, outSize * vocSize)
+        logits = logits.view(-1, self.outSize, self.vocSize)  # (batch_size, outSize, vocSize)
         return logits
 
 
