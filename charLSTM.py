@@ -7,15 +7,15 @@ import numpy as np
 
 import trinketbox.ai.utils.tokenDataset as integerDataset
 
-from griot import char
-from griot import tool as griotTools
-#0 is null
-#1 is end of sent
+from griot import char, tool as griotTools
+
 vocab = char.Vocab()
 vocab.addCharacters(list('abcdefghijklmnopqrstuvwxyz -,.:;\''))
 
 
-### LSTM Architecture Parameters
+
+
+### LSTM Architecture Parameters TODO: pick snakecase or camelcase smh
 inSize : int = 512         # Context window
 outSize : int = 1          # How many chars to predict
 embedding_dim : int = 384  # Embedding dimension for vocabulary
@@ -24,11 +24,9 @@ num_layers : int = 2       # Number of LSTM layers
 dropout : float = 0.2      # Dropout for regularization between LSTM layers
 device : torch.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 modelPath = 'model.pth'
-### Training params
 
 
-
-### Load data
+### Load data TODO: move this to train.py
 def loadTrainAndTestData(batch_size,trainingDataPath="data.csv",divisor=2):
     with open(trainingDataPath, "r") as csvfile:
         readout = list(csv.reader(csvfile))[1:]
@@ -59,7 +57,7 @@ def loadTrainAndTestData(batch_size,trainingDataPath="data.csv",divisor=2):
 
 
 
-###
+
 class NeuralNetwork(nn.Module):
     def __init__(self, vocSize, inSize, outSize, 
                  embedding_dim=128, 
@@ -90,21 +88,22 @@ class NeuralNetwork(nn.Module):
         logits = logits.view(-1, self.outSize, self.vocSize)  # (batch_size, outSize, vocSize)
         return logits
 
+    def saveWeights(self,weightsPath:str='model.pth') -> None:
+        torch.save(self.state_dict(),weightsPath)
+        return
+    def loadWeights(self,weightsPath:str='model.pth') -> None:
+        print('attempting to load weights')
+        try:
+            self.load_state_dict(torch.load(weightsPath))
+        except:
+            print('load failed')
+        return
 
 
 
-model = NeuralNetwork(vocSize=len(vocab), inSize=inSize, outSize=outSize, 
-                      embedding_dim=embedding_dim, hidden_size=hidden_size, 
-                      num_layers=num_layers, dropout=dropout).to(device)
-try:
-    print('loading last save')
-    model.load_state_dict(torch.load(modelPath))
-except FileNotFoundError:
-    print('loading failed, starting from scratch')
-
-print('model loaded')
-
-
-
-
-
+def create() -> NeuralNetwork:
+    print('creating model,,,')
+    model = NeuralNetwork(vocSize=len(vocab), inSize=inSize, outSize=outSize, 
+                            embedding_dim=embedding_dim, hidden_size=hidden_size, 
+                            num_layers=num_layers, dropout=dropout).to(device)
+    return model
