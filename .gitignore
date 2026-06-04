@@ -208,3 +208,12 @@ __marimo__/
 data/
 *.csv
 *.pth
+
+#pyenv bs
+bin/
+include/
+lib/
+lib64/
+lib64
+share/
+pyvenv.cfg
