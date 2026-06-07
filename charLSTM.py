@@ -19,7 +19,7 @@ vocab.addCharacters(list('abcdefghijklmnopqrstuvwxyz -,.:;\''))
 inSize : int = 512         # Context window
 outSize : int = 1          # How many chars to predict
 embedding_dim : int = 384  # Embedding dimension for vocabulary
-hidden_size : int = 768    # Hidden size for each LSTM layer
+hidden_size : int = 1024    # Hidden size for each LSTM layer
 num_layers : int = 2       # Number of LSTM layers
 dropout : float = 0.2      # Dropout for regularization between LSTM layers
 device : torch.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -27,13 +27,13 @@ modelPath = 'model.pth'
 
 
 ### Load data TODO: move this to train.py
-def loadTrainAndTestData(batch_size,trainingDataPath="data.csv",divisor=2):
+def loadTrainAndTestData(batch_size,trainingDataPath="data.csv",divisor=2,csvPosition=-3):
     with open(trainingDataPath, "r") as csvfile:
         readout = list(csv.reader(csvfile))[1:]
         out = []
         for r in readout:
-            if len(r[3]) > 3:
-                out.append(r[-1].strip().lower())
+            if len(r[csvPosition]) > 3:
+                out.append(r[csvPosition].strip().lower())
     readout = out
 
 
@@ -49,7 +49,7 @@ def loadTrainAndTestData(batch_size,trainingDataPath="data.csv",divisor=2):
                                     vocSize=len(vocab))
     train_dataloader = DataLoader(train_dataSet, batch_size=batch_size, 
                                 shuffle=True,
-                                num_workers=4)
+                                num_workers=4,pin_memory=True,prefetch_factor=10)
     test_dataloader = DataLoader(test_dataSet, batch_size=batch_size,
                                 shuffle=True,
                                 num_workers=4)
@@ -65,7 +65,7 @@ class NeuralNetwork(nn.Module):
                  num_layers=2, 
                  dropout=0.2):
         super().__init__()
-        self.embedding = nn.Embedding(vocSize, embedding_dim)
+        self.embedding = nn.Embedding(vocSize, embedding_dim,padding_idx=vocab.nulTok[0],scale_grad_by_freq=True)
         self.lstm = nn.LSTM(input_size=embedding_dim, 
                            hidden_size=hidden_size, 
                            num_layers=num_layers, 
