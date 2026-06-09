@@ -38,7 +38,7 @@ def loadTrainAndTestData(batch_size,trainingDataPath="data.csv",divisor=2,csvPos
 
 
     ### Begin tokenizing data
-    x : list[int] = griotTools.flattenTokenizedLines(vocab.tokenizeLines(out))
+    x : list[int] = griotTools.flattenLines(vocab.tokenizeLines(out))
 
 
     train_dataSet = integerDataset.lazyTextDataset(inSize=inSize,outSize=outSize,
