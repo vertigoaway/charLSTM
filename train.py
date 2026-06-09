@@ -33,7 +33,6 @@ def main():
                                     optimizer)
 
     print('starting training session')
-    print(f"Approx training steps per epoch:{len(train_dataloader)//batch_size}")
     try:
         for t in range(epochs):
             print(f"Epoch {t+1}\n-------------------------------")
